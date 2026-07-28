@@ -9,23 +9,36 @@ def speak(text):
     engine.say(text)
     engine.runAndWait()
 
+def listen():
+    with sr.Microphone() as source:
+        print("Listening.....")
+        audio = recognizer.listen(source)
 
+    try:
+        command = recognizer.recognize_sphinx(audio)
+        print(command)
+        return command.lower()
+    except sr.UnknownValueError:
+        print("Sphinx could not understand audio")
+        return ""
+    except sr.RequestError as e:
+        print("Sphinx error; {0}".format(e))
+        return ""
 
-if __name__== "__main__":
+def handle_command(command):
+    if "open youtube" in command:
+        speak("Opening YouTube")
+        webbrowser.open("https://youtube.com")
+    elif "open google" in command:
+        speak("Opening Google")
+        webbrowser.open("https://google.com")
+    elif command == "":
+        pass
+    else:
+        speak("I did not understand that command")
+
+if __name__ == "__main__":
+    speak("Initializing Jarvis")
     while True:
-        speak("Initializing Jarvis......")
-        #Listen for the word Jarvis
-        #obtain audio from microphone
-        r = sr.Recognizer()
-        with sr.Microphone() as source:
-            print("Listening.....")
-            audio = r.listen(source)
-
-        #recoginze speech using Sphinx
-        try:
-            command = r.recognize_sphinx(audio)
-            print(command)
-        except sr.UnknownValueError:
-            print("Sphinx could not understand audio")
-        except sr.RequestError as e:
-            print("Sphinx error; {0}".format(e))
+        command = listen()
+        handle_command(command)
