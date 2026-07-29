@@ -11,24 +11,25 @@ def speak(text):
 
 def listen():
     with sr.Microphone() as source:
+        recognizer.adjust_for_ambient_noise(source, duration=1)
         print("Listening.....")
         audio = recognizer.listen(source)
 
     try:
-        command = recognizer.recognize_sphinx(audio)
+        command = recognizer.recognize_google(audio)
         print(command)
         return command.lower()
     except sr.UnknownValueError:
-        print("Sphinx could not understand audio")
+        print("Could not understand audio")
         return ""
     except sr.RequestError as e:
-        print("Sphinx error; {0}".format(e))
+        print("Recognition error; {0}".format(e))
         return ""
 
 def handle_command(command):
     if "open youtube" in command:
         speak("Opening YouTube")
-        webbrowser.open("https://youtube.com")
+        webbrowser.open("https:/switching from sphinx/youtube.com")
     elif "open google" in command:
         speak("Opening Google")
         webbrowser.open("https://google.com")
