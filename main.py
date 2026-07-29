@@ -4,6 +4,7 @@ import pyttsx3
 import datetime
 
 recognizer = sr.Recognizer()
+
 def speak(text):
     engine = pyttsx3.init()
     engine.say(text)
@@ -29,6 +30,7 @@ def listen():
         return ""
     except sr.RequestError as e:
         print("Recognition error; {0}".format(e))
+        speak("I am having trouble connecting to the internet")
         return ""
 
 def handle_command(command):
@@ -38,6 +40,9 @@ def handle_command(command):
     elif "open google" in command:
         speak("Opening Google")
         webbrowser.open("https://google.com")
+    elif "what time" in command or "current time" in command:
+        current_time = datetime.datetime.now().strftime("%I:%M %p")
+        speak(f"The time is {current_time}")
     elif "search for" in command:
         query = command.split("search for", 1)[1].strip()
         if query:
@@ -45,16 +50,25 @@ def handle_command(command):
             webbrowser.open(f"https://www.google.com/search?q={query}")
         else:
             speak("What do you want me to search for?")
-    elif "what time" in command or "current time" in command:
-        current_time = datetime.datetime.now().strftime("%I:%M %p")
-        speak(f"The time is {current_time}")
+    elif "exit" in command or "quit" in command or "stop listening" in command or "bye" in command:
+        speak("Goodbye")
+        return False
     elif command == "":
         pass
     else:
         speak("I did not understand that command")
+    return True
 
 if __name__ == "__main__":
     speak("Initializing Jarvis")
-    while True:
-        command = listen()
-        handle_command(command)
+    running = True
+    while running:
+        try:
+            command = listen()
+            running = handle_command(command)
+        except KeyboardInterrupt:
+            print("Shutting down.")
+            break
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            speak("Something went wrong, but I am still running")
