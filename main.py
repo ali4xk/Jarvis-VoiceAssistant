@@ -38,6 +38,13 @@ def handle_command(command):
     elif "open google" in command:
         speak("Opening Google")
         webbrowser.open("https://google.com")
+    elif "search for" in command:
+        query = command.split("search for", 1)[1].strip()
+        if query:
+            speak(f"Searching for {query}")
+            webbrowser.open(f"https://www.google.com/search?q={query}")
+        else:
+            speak("What do you want me to search for?")
     elif "what time" in command or "current time" in command:
         current_time = datetime.datetime.now().strftime("%I:%M %p")
         speak(f"The time is {current_time}")
