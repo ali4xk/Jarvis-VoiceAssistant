@@ -2,8 +2,11 @@ import speech_recognition as sr
 import webbrowser
 import pyttsx3
 import datetime
+import requests
+import os
 
 recognizer = sr.Recognizer()
+WEATHER_API_KEY = os.environ.get("OPENWEATHER_API_KEY")
 
 def speak(text):
     engine = pyttsx3.init()
@@ -33,6 +36,26 @@ def listen():
         speak("I am having trouble connecting to the internet")
         return ""
 
+def get_weather(city):
+    url = "https://api.openweathermap.org/data/2.5/weather"
+    params = {
+        "q": city,
+        "appid": WEATHER_API_KEY,
+        "units": "metric"
+    }
+    try:
+        response = requests.get(url, params=params, timeout=5)
+        data = response.json()
+
+        if response.status_code != 200:
+            return f"I could not find weather for {city}"
+
+        temp = data["main"]["temp"]
+        description = data["weather"][0]["description"]
+        return f"It is currently {temp} degrees Celsius with {description} in {city}"
+    except requests.exceptions.RequestException:
+        return "I could not reach the weather service"
+
 def handle_command(command):
     if "open youtube" in command:
         speak("Opening YouTube")
@@ -50,6 +73,12 @@ def handle_command(command):
             webbrowser.open(f"https://www.google.com/search?q={query}")
         else:
             speak("What do you want me to search for?")
+    elif "weather in" in command:
+        city = command.split("weather in", 1)[1].strip()
+        if city:
+            speak(get_weather(city))
+        else:
+            speak("Which city do you want the weather for?")
     elif "exit" in command or "quit" in command or "stop listening" in command or "bye" in command:
         speak("Goodbye")
         return False
