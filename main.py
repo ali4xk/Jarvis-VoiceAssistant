@@ -48,6 +48,7 @@ def get_weather(city):
         data = response.json()
 
         if response.status_code != 200:
+            print(f"Weather API error: {response.status_code} - {data}")
             return f"I could not find weather for {city}"
 
         temp = data["main"]["temp"]
