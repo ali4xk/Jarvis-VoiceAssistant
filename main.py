@@ -3,6 +3,7 @@ import webbrowser
 import pyttsx3
 import datetime
 import requests
+import subprocess
 import os
 
 recognizer = sr.Recognizer()
@@ -48,7 +49,6 @@ def get_weather(city):
         data = response.json()
 
         if response.status_code != 200:
-            print(f"Weather API error: {response.status_code} - {data}")
             return f"I could not find weather for {city}"
 
         temp = data["main"]["temp"]
@@ -56,6 +56,32 @@ def get_weather(city):
         return f"It is currently {temp} degrees Celsius with {description} in {city}"
     except requests.exceptions.RequestException:
         return "I could not reach the weather service"
+
+APPS = {
+    "notepad": "notepad.exe",
+    "calculator": "calc.exe",
+    "paint": "mspaint.exe",
+    "chrome": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+    "spotify": r"C:\Users\LENOVO\AppData\Local\Microsoft\WindowsApps\Spotify.exe",
+    "whatsapp": r"C:\Program Files\WindowsApps\5319275A.WhatsAppDesktop_2.2628.101.0_x64__cv1g1gvanyjgm",
+}
+
+def open_app(app_name):
+    if app_name == "settings":
+        try:
+            os.startfile("ms-settings:")
+            return "Opening Settings"
+        except OSError:
+            return "I could not open Settings"
+
+    exe = APPS.get(app_name)
+    if not exe:
+        return f"I do not know how to open {app_name}"
+    try:
+        subprocess.Popen(exe)
+        return f"Opening {app_name}"
+    except FileNotFoundError:
+        return f"I could not find {app_name} on this computer"
 
 def handle_command(command):
     if "open youtube" in command:
@@ -80,6 +106,20 @@ def handle_command(command):
             speak(get_weather(city))
         else:
             speak("Which city do you want the weather for?")
+    elif "open notepad" in command:
+        speak(open_app("notepad"))
+    elif "open calculator" in command:
+        speak(open_app("calculator"))
+    elif "open paint" in command:
+        speak(open_app("paint"))
+    elif "open chrome" in command:
+        speak(open_app("chrome"))
+    elif "open spotify" in command:
+        speak(open_app("spotify"))
+    elif "open whatsapp" in command:
+        speak(open_app("whatsapp"))
+    elif "open settings" in command:
+        speak(open_app("settings"))
     elif "exit" in command or "quit" in command or "stop listening" in command or "bye" in command:
         speak("Goodbye")
         return False
