@@ -5,9 +5,11 @@ import datetime
 import requests
 import subprocess
 import os
+import json
 
 recognizer = sr.Recognizer()
 WEATHER_API_KEY = os.environ.get("OPENWEATHER_API_KEY")
+TASKS_FILE = "tasks.json"
 
 def speak(text):
     engine = pyttsx3.init()
@@ -89,6 +91,38 @@ def open_app(app_name):
     except FileNotFoundError:
         return f"I could not find {app_name} on this computer"
 
+def load_tasks():
+    if not os.path.exists(TASKS_FILE):
+        return []
+    try:
+        with open(TASKS_FILE, "r") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, FileNotFoundError):
+        return []
+
+def save_tasks(tasks):
+    with open(TASKS_FILE, "w") as f:
+        json.dump(tasks, f, indent=2)
+
+def add_task(task_text):
+    tasks = load_tasks()
+    tasks.append(task_text)
+    save_tasks(tasks)
+    return f"Added task: {task_text}"
+
+def list_tasks():
+    tasks = load_tasks()
+    if not tasks:
+        return "You have no tasks"
+    if len(tasks) == 1:
+        return f"You have one task: {tasks[0]}"
+    task_list = ", ".join(tasks)
+    return f"You have {len(tasks)} tasks: {task_list}"
+
+def clear_tasks():
+    save_tasks([])
+    return "All tasks cleared"
+
 def handle_command(command):
     if "open youtube" in command:
         speak("Opening YouTube")
@@ -126,6 +160,16 @@ def handle_command(command):
         speak(open_app("whatsapp"))
     elif "open settings" in command:
         speak(open_app("settings"))
+    elif "add task" in command:
+        task_text = command.split("add task", 1)[1].strip()
+        if task_text:
+            speak(add_task(task_text))
+        else:
+            speak("What is the task?")
+    elif "my tasks" in command or "list tasks" in command:
+        speak(list_tasks())
+    elif "clear tasks" in command:
+        speak(clear_tasks())
     elif "exit" in command or "quit" in command or "stop listening" in command or "bye" in command:
         speak("Goodbye")
         return False
