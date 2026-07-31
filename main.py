@@ -6,10 +6,14 @@ import requests
 import subprocess
 import os
 import json
+import whisper
 
 recognizer = sr.Recognizer()
 WEATHER_API_KEY = os.environ.get("OPENWEATHER_API_KEY")
 TASKS_FILE = "tasks.json"
+TEMP_AUDIO_FILE = "temp_audio.wav"
+
+whisper_model = whisper.load_model("base")
 
 def speak(text):
     engine = pyttsx3.init()
@@ -27,17 +31,20 @@ def listen():
             print("No speech detected")
             return ""
 
+    with open(TEMP_AUDIO_FILE, "wb") as f:
+        f.write(audio.get_wav_data())
+
     try:
-        command = recognizer.recognize_google(audio)
+        result = whisper_model.transcribe(TEMP_AUDIO_FILE, fp16=False)
+        command = result["text"].strip().lower()
         print(command)
-        return command.lower()
-    except sr.UnknownValueError:
-        print("Could not understand audio")
+        return command
+    except Exception as e:
+        print(f"Whisper error: {e}")
         return ""
-    except sr.RequestError as e:
-        print("Recognition error; {0}".format(e))
-        speak("I am having trouble connecting to the internet")
-        return ""
+    finally:
+        if os.path.exists(TEMP_AUDIO_FILE):
+            os.remove(TEMP_AUDIO_FILE)
 
 def get_weather(city):
     url = "https://api.openweathermap.org/data/2.5/weather"
@@ -170,7 +177,7 @@ def handle_command(command):
         speak(list_tasks())
     elif "clear tasks" in command:
         speak(clear_tasks())
-    elif "exit" in command or "quit" in command or "stop listening" in command or "bye" in command:
+    elif "exit" in command or "quit" in command or "stop listening" in command:
         speak("Goodbye")
         return False
     elif command == "":
