@@ -63,7 +63,6 @@ APPS = {
     "paint": "mspaint.exe",
     "chrome": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
     "spotify": r"C:\Users\LENOVO\AppData\Local\Microsoft\WindowsApps\Spotify.exe",
-    "whatsapp": r"C:\Program Files\WindowsApps\5319275A.WhatsAppDesktop_2.2628.101.0_x64__cv1g1gvanyjgm",
 }
 
 def open_app(app_name):
@@ -73,6 +72,13 @@ def open_app(app_name):
             return "Opening Settings"
         except OSError:
             return "I could not open Settings"
+
+    if app_name == "whatsapp":
+        try:
+            os.startfile("shell:AppsFolder\\5319275A.WhatsAppDesktop_cv1g1gvanyjgm!App")
+            return "Opening WhatsApp"
+        except OSError:
+            return "I could not open WhatsApp"
 
     exe = APPS.get(app_name)
     if not exe:
