@@ -167,8 +167,8 @@ def handle_command(command):
         speak(open_app("whatsapp"))
     elif "open settings" in command:
         speak(open_app("settings"))
-    elif "add task" in command:
-        task_text = command.split("add task", 1)[1].strip()
+    elif "add a task" in command:
+        task_text = command.split("add a task", 1)[1].strip()
         if task_text:
             speak(add_task(task_text))
         else:
@@ -177,7 +177,7 @@ def handle_command(command):
         speak(list_tasks())
     elif "clear tasks" in command:
         speak(clear_tasks())
-    elif "exit" in command or "quit" in command or "stop listening" in command:
+    elif "exit" in command or "quit" in command or "stop listening" in command or "bye" in command:
         speak("Goodbye")
         return False
     elif command == "":
